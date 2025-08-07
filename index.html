@@ -20,14 +20,19 @@
             --text-dim: #444444;
             --accent: #ffffff;
             --border: #222222;
-            --lived: #2a2a2a;
-            --future: #0f0f0f;
+            /* Improved contrast for full life view */
+            --lived: #3a3a3a;
+            --future: #181818;
+            --unlived: #0a0a0a;  /* Dark for unlived days */
             --today: #ffffff;
             --success: #22ff44;
             --failure: #ff4444;
             --has-todos: #3a3a3a;
             --completed-todos: #1a4a1a;
             --incomplete-todos: #4a1a1a;
+            --weekend: rgba(255, 255, 255, 0.05);
+            --month-start: #666666;
+            --month-end: #666666;
         }
 
         body {
@@ -54,7 +59,7 @@
         .container {
             position: relative;
             z-index: 2;
-            max-width: 1600px;
+            max-width: 100%;
             margin: 0 auto;
             padding: 40px 20px;
         }
@@ -191,6 +196,21 @@
             transform: scale(3);
         }
 
+        /* Better contrast for full life view */
+        .full-life-grid .day.before-birth {
+            background: #0a0a0a;
+            opacity: 0.5;
+        }
+
+        .full-life-grid .day.lived {
+            background: #3a3a3a;
+        }
+
+        .full-life-grid .day.future {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+        }
+
         .view-btn {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -290,16 +310,9 @@
 
         .days-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(8px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(20px, 1fr));
             gap: 2px;
-            max-width: 100%;
-        }
-
-        .month-divider {
-            grid-column: 1 / -1;
-            height: 1px;
-            background: var(--border);
-            margin: 4px 0;
+            width: 100%;
         }
 
         .day {
@@ -309,8 +322,33 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
-            min-width: 8px;
-            min-height: 8px;
+            min-width: 20px;
+            min-height: 20px;
+            border: 1px solid transparent;
+        }
+
+        /* Weekend styling */
+        .day.weekend {
+            background: var(--weekend);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .day.weekend.lived {
+            background: linear-gradient(135deg, var(--lived) 50%, var(--weekend) 50%);
+        }
+
+        /* Month boundaries */
+        .day.month-start {
+            border-left: 2px solid var(--month-start);
+        }
+
+        .day.month-end {
+            border-right: 2px solid var(--month-end);
+        }
+
+        .day.before-birth {
+            background: #0a0a0a;
+            opacity: 0.5;
         }
 
         .day.lived {
@@ -336,10 +374,11 @@
             background: var(--today);
             box-shadow: 0 0 20px rgba(255,255,255,0.3);
             animation: pulse 2s ease-in-out infinite;
+            border: 2px solid var(--today);
         }
 
         .day:hover {
-            transform: scale(2);
+            transform: scale(1.5);
             background: var(--accent);
             box-shadow: 0 0 20px rgba(255,255,255,0.2);
             z-index: 10;
@@ -374,6 +413,7 @@
             font-size: 12px;
             opacity: 0;
             animation: fadeIn 1.5s ease-out 1.3s forwards;
+            flex-wrap: wrap;
         }
 
         .legend-item {
@@ -472,18 +512,19 @@
         }
 
         .todo-input {
+            display: flex;
+            gap: 8px;
             margin-bottom: 20px;
         }
 
-        .todo-input input[type="text"] {
-            width: 100%;
+        .todo-input input {
+            flex: 1;
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             color: var(--text-primary);
             padding: 12px;
             border-radius: 8px;
             font-size: 14px;
-            margin-bottom: 12px;
         }
 
         .todo-input input:focus {
@@ -491,52 +532,7 @@
             border-color: var(--accent);
         }
 
-        .date-range-section {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-
-        .date-range-toggle {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .toggle-checkbox {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .date-range-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 12px;
-        }
-
-        .date-range-inputs input {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 13px;
-        }
-
-        .date-range-label {
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-
-        .add-todo-btn {
-            width: 100%;
+        .todo-input button {
             background: var(--text-primary);
             color: var(--bg-primary);
             border: none;
@@ -544,14 +540,10 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .add-todo-btn:hover {
+        .todo-input button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(255,255,255,0.1);
         }
 
         .todo-list {
@@ -673,13 +665,6 @@
             background: var(--text-primary);
             color: var(--bg-primary);
         }
-
-        .multi-date-info {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-top: 8px;
-            font-style: italic;
-        }
     </style>
 </head>
 <body>
@@ -737,8 +722,12 @@
                     <span>Today</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-box" style="background: var(--future)"></div>
+                    <div class="legend-box" style="background: #1a1a1a; border: 1px solid #2a2a2a"></div>
                     <span>Future</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: var(--weekend); border: 1px solid rgba(255, 255, 255, 0.1)"></div>
+                    <span>Weekend</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-box" style="background: var(--completed-todos); border: 1px solid var(--success)"></div>
@@ -763,31 +752,8 @@
             </div>
             
             <div class="todo-input">
-                <input type="text" id="todoInput" placeholder="What will you accomplish?">
-                
-                <div class="date-range-section">
-                    <div class="date-range-toggle">
-                        <input type="checkbox" id="multiDateToggle" class="toggle-checkbox" onchange="toggleMultiDate()">
-                        <label for="multiDateToggle">Add to multiple dates</label>
-                    </div>
-                    
-                    <div class="date-range-inputs hidden" id="dateRangeInputs">
-                        <div>
-                            <div class="date-range-label">Start Date</div>
-                            <input type="date" id="startDate">
-                        </div>
-                        <div>
-                            <div class="date-range-label">End Date</div>
-                            <input type="date" id="endDate">
-                        </div>
-                    </div>
-                    
-                    <div class="multi-date-info hidden" id="multiDateInfo">
-                        This task will be added to <span id="dateCount">0</span> days
-                    </div>
-                </div>
-                
-                <button class="add-todo-btn" onclick="addTodo()">Add Task</button>
+                <input type="text" id="todoInput" placeholder="What will you accomplish today?">
+                <button onclick="addTodo()">Add</button>
             </div>
 
             <div class="todo-list" id="todoList"></div>
@@ -815,55 +781,6 @@
             loadData();
         });
 
-        // Toggle multi-date selection
-        function toggleMultiDate() {
-            const isChecked = document.getElementById('multiDateToggle').checked;
-            const dateRangeInputs = document.getElementById('dateRangeInputs');
-            const multiDateInfo = document.getElementById('multiDateInfo');
-            
-            if (isChecked) {
-                dateRangeInputs.classList.remove('hidden');
-                multiDateInfo.classList.remove('hidden');
-                
-                // Set default dates
-                document.getElementById('startDate').value = currentDay;
-                document.getElementById('endDate').value = currentDay;
-                updateDateCount();
-            } else {
-                dateRangeInputs.classList.add('hidden');
-                multiDateInfo.classList.add('hidden');
-            }
-        }
-
-        // Update date count display
-        function updateDateCount() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            
-            if (startDate && endDate) {
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                const dayCount = Math.ceil((end - start) / (24 * 60 * 60 * 1000)) + 1;
-                
-                if (dayCount > 0) {
-                    document.getElementById('dateCount').textContent = dayCount;
-                } else {
-                    document.getElementById('dateCount').textContent = '0';
-                }
-            }
-        }
-
-        // Add event listeners for date inputs
-        document.addEventListener('DOMContentLoaded', () => {
-            const startDate = document.getElementById('startDate');
-            const endDate = document.getElementById('endDate');
-            
-            if (startDate && endDate) {
-                startDate.addEventListener('change', updateDateCount);
-                endDate.addEventListener('change', updateDateCount);
-            }
-        });
-
         // Switch between views
         function switchView(view) {
             currentView = view;
@@ -884,6 +801,24 @@
                 document.getElementById('fullLifeGrid').classList.remove('hidden');
                 renderFullLifeGrid();
             }
+        }
+
+        // Check if date is a weekend
+        function isWeekend(date) {
+            const day = date.getDay();
+            return day === 0 || day === 6; // Sunday or Saturday
+        }
+
+        // Check if date is the first day of month
+        function isMonthStart(date) {
+            return date.getDate() === 1;
+        }
+
+        // Check if date is the last day of month
+        function isMonthEnd(date) {
+            const nextDay = new Date(date);
+            nextDay.setDate(date.getDate() + 1);
+            return nextDay.getDate() === 1;
         }
 
         // Render full life grid (entire life in one view)
@@ -928,11 +863,13 @@
                     
                     // Determine day status
                     if (dayDate < birthDate) {
-                        dayElement.classList.add('future'); // Before birth
+                        dayElement.classList.add('before-birth');
                     } else if (dayDate < today) {
                         dayElement.classList.add('lived');
                     } else if (dayDate.getTime() === today.getTime()) {
                         dayElement.classList.add('today');
+                    } else {
+                        dayElement.classList.add('future');
                     }
                     
                     // Check for todos
@@ -950,14 +887,13 @@
                         }
                     }
                     
-                    // Add tooltip
+                    // Add tooltip with DD/MM/YYYY format
                     const tooltip = document.createElement('div');
                     tooltip.className = 'day-tooltip';
-                    tooltip.textContent = dayDate.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric',
-                        year: 'numeric'
-                    });
+                    const day = dayDate.getDate().toString().padStart(2, '0');
+                    const month = (dayDate.getMonth() + 1).toString().padStart(2, '0');
+                    const year = dayDate.getFullYear();
+                    tooltip.textContent = `${day}/${month}/${year}`;
                     dayElement.appendChild(tooltip);
                     
                     dayElement.dataset.date = dateStr;
@@ -1099,26 +1035,29 @@
                 const yearEnd = new Date(year, 11, 31);
                 const currentDate = new Date(yearStart);
                 
-                let lastMonth = -1;
-                
                 while (currentDate <= yearEnd) {
-                    // Add month divider
-                    if (currentDate.getMonth() !== lastMonth && lastMonth !== -1) {
-                        const divider = document.createElement('div');
-                        divider.className = 'month-divider';
-                        daysGrid.appendChild(divider);
-                    }
-                    lastMonth = currentDate.getMonth();
-                    
                     const dayElement = document.createElement('div');
                     dayElement.className = 'day';
                     
                     const dayDate = new Date(currentDate);
                     const dateStr = dayDate.toISOString().split('T')[0];
                     
+                    // Add weekend class
+                    if (isWeekend(dayDate)) {
+                        dayElement.classList.add('weekend');
+                    }
+                    
+                    // Add month boundary classes
+                    if (isMonthStart(dayDate)) {
+                        dayElement.classList.add('month-start');
+                    }
+                    if (isMonthEnd(dayDate)) {
+                        dayElement.classList.add('month-end');
+                    }
+                    
                     // Determine day status
                     if (dayDate < birthDate) {
-                        dayElement.classList.add('future'); // Before birth
+                        dayElement.classList.add('before-birth');
                     } else if (dayDate < today) {
                         dayElement.classList.add('lived');
                     } else if (dayDate.getTime() === today.getTime()) {
@@ -1140,14 +1079,14 @@
                         }
                     }
                     
-                    // Add tooltip
+                    // Add tooltip with DD/MM/YYYY format
                     const tooltip = document.createElement('div');
                     tooltip.className = 'day-tooltip';
-                    tooltip.textContent = dayDate.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric',
-                        year: 'numeric'
-                    });
+                    const weekdayName = dayDate.toLocaleDateString('en-GB', { weekday: 'short' });
+                    const day = dayDate.getDate().toString().padStart(2, '0');
+                    const month = (dayDate.getMonth() + 1).toString().padStart(2, '0');
+                    const year = dayDate.getFullYear();
+                    tooltip.textContent = `${weekdayName}, ${day}/${month}/${year}`;
                     dayElement.appendChild(tooltip);
                     
                     dayElement.dataset.date = dateStr;
@@ -1188,17 +1127,12 @@
 
         function openDay(date) {
             currentDay = date.toISOString().split('T')[0];
-            document.getElementById('modalDate').textContent = date.toLocaleDateString('en-US', { 
+            document.getElementById('modalDate').textContent = date.toLocaleDateString('en-GB', { 
                 weekday: 'long', 
-                year: 'numeric', 
+                day: 'numeric',
                 month: 'long', 
-                day: 'numeric' 
+                year: 'numeric' 
             });
-            
-            // Reset multi-date toggle
-            document.getElementById('multiDateToggle').checked = false;
-            document.getElementById('dateRangeInputs').classList.add('hidden');
-            document.getElementById('multiDateInfo').classList.add('hidden');
             
             renderTodos();
             document.getElementById('dayModal').classList.add('active');
@@ -1209,7 +1143,7 @@
             document.getElementById('dayModal').classList.remove('active');
             currentDay = null;
             
-            // Refresh grid based on current view
+            // Refresh the appropriate view
             if (currentView === 'detail') {
                 renderLifeGrid();
             } else {
@@ -1224,57 +1158,16 @@
             
             if (!text) return;
 
-            const isMultiDate = document.getElementById('multiDateToggle').checked;
-            
-            if (isMultiDate) {
-                // Add to multiple dates
-                const startDate = new Date(document.getElementById('startDate').value);
-                const endDate = new Date(document.getElementById('endDate').value);
-                
-                if (startDate > endDate) {
-                    alert('End date must be after start date');
-                    return;
-                }
-                
-                const currentDate = new Date(startDate);
-                let addedCount = 0;
-                
-                while (currentDate <= endDate) {
-                    const dateStr = currentDate.toISOString().split('T')[0];
-                    
-                    if (!userData.todos[dateStr]) {
-                        userData.todos[dateStr] = [];
-                    }
-                    
-                    userData.todos[dateStr].push({
-                        id: Date.now() + addedCount, // Unique ID for each
-                        text: text,
-                        completed: false,
-                        createdAt: new Date().toISOString()
-                    });
-                    
-                    addedCount++;
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
-                
-                // Reset multi-date selection
-                document.getElementById('multiDateToggle').checked = false;
-                document.getElementById('dateRangeInputs').classList.add('hidden');
-                document.getElementById('multiDateInfo').classList.add('hidden');
-                
-            } else {
-                // Add to single date (current day)
-                if (!userData.todos[currentDay]) {
-                    userData.todos[currentDay] = [];
-                }
-
-                userData.todos[currentDay].push({
-                    id: Date.now(),
-                    text: text,
-                    completed: false,
-                    createdAt: new Date().toISOString()
-                });
+            if (!userData.todos[currentDay]) {
+                userData.todos[currentDay] = [];
             }
+
+            userData.todos[currentDay].push({
+                id: Date.now(),
+                text: text,
+                completed: false,
+                createdAt: new Date().toISOString()
+            });
 
             saveData();
             input.value = '';
