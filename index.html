@@ -472,19 +472,18 @@
         }
 
         .todo-input {
-            display: flex;
-            gap: 8px;
             margin-bottom: 20px;
         }
 
-        .todo-input input {
-            flex: 1;
+        .todo-input input[type="text"] {
+            width: 100%;
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             color: var(--text-primary);
             padding: 12px;
             border-radius: 8px;
             font-size: 14px;
+            margin-bottom: 12px;
         }
 
         .todo-input input:focus {
@@ -492,7 +491,52 @@
             border-color: var(--accent);
         }
 
-        .todo-input button {
+        .date-range-section {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .date-range-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .toggle-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .date-range-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .date-range-inputs input {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .date-range-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .add-todo-btn {
+            width: 100%;
             background: var(--text-primary);
             color: var(--bg-primary);
             border: none;
@@ -500,10 +544,14 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .todo-input button:hover {
+        .add-todo-btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255,255,255,0.1);
         }
 
         .todo-list {
@@ -625,6 +673,13 @@
             background: var(--text-primary);
             color: var(--bg-primary);
         }
+
+        .multi-date-info {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -708,8 +763,31 @@
             </div>
             
             <div class="todo-input">
-                <input type="text" id="todoInput" placeholder="What will you accomplish today?">
-                <button onclick="addTodo()">Add</button>
+                <input type="text" id="todoInput" placeholder="What will you accomplish?">
+                
+                <div class="date-range-section">
+                    <div class="date-range-toggle">
+                        <input type="checkbox" id="multiDateToggle" class="toggle-checkbox" onchange="toggleMultiDate()">
+                        <label for="multiDateToggle">Add to multiple dates</label>
+                    </div>
+                    
+                    <div class="date-range-inputs hidden" id="dateRangeInputs">
+                        <div>
+                            <div class="date-range-label">Start Date</div>
+                            <input type="date" id="startDate">
+                        </div>
+                        <div>
+                            <div class="date-range-label">End Date</div>
+                            <input type="date" id="endDate">
+                        </div>
+                    </div>
+                    
+                    <div class="multi-date-info hidden" id="multiDateInfo">
+                        This task will be added to <span id="dateCount">0</span> days
+                    </div>
+                </div>
+                
+                <button class="add-todo-btn" onclick="addTodo()">Add Task</button>
             </div>
 
             <div class="todo-list" id="todoList"></div>
@@ -735,6 +813,55 @@
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
             loadData();
+        });
+
+        // Toggle multi-date selection
+        function toggleMultiDate() {
+            const isChecked = document.getElementById('multiDateToggle').checked;
+            const dateRangeInputs = document.getElementById('dateRangeInputs');
+            const multiDateInfo = document.getElementById('multiDateInfo');
+            
+            if (isChecked) {
+                dateRangeInputs.classList.remove('hidden');
+                multiDateInfo.classList.remove('hidden');
+                
+                // Set default dates
+                document.getElementById('startDate').value = currentDay;
+                document.getElementById('endDate').value = currentDay;
+                updateDateCount();
+            } else {
+                dateRangeInputs.classList.add('hidden');
+                multiDateInfo.classList.add('hidden');
+            }
+        }
+
+        // Update date count display
+        function updateDateCount() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const dayCount = Math.ceil((end - start) / (24 * 60 * 60 * 1000)) + 1;
+                
+                if (dayCount > 0) {
+                    document.getElementById('dateCount').textContent = dayCount;
+                } else {
+                    document.getElementById('dateCount').textContent = '0';
+                }
+            }
+        }
+
+        // Add event listeners for date inputs
+        document.addEventListener('DOMContentLoaded', () => {
+            const startDate = document.getElementById('startDate');
+            const endDate = document.getElementById('endDate');
+            
+            if (startDate && endDate) {
+                startDate.addEventListener('change', updateDateCount);
+                endDate.addEventListener('change', updateDateCount);
+            }
         });
 
         // Switch between views
@@ -1068,6 +1195,11 @@
                 day: 'numeric' 
             });
             
+            // Reset multi-date toggle
+            document.getElementById('multiDateToggle').checked = false;
+            document.getElementById('dateRangeInputs').classList.add('hidden');
+            document.getElementById('multiDateInfo').classList.add('hidden');
+            
             renderTodos();
             document.getElementById('dayModal').classList.add('active');
             document.getElementById('todoInput').focus();
@@ -1076,8 +1208,14 @@
         function closeModal() {
             document.getElementById('dayModal').classList.remove('active');
             currentDay = null;
-            renderLifeGrid(); // Refresh to show updated todo indicators
-            updateStats(); // Update stats
+            
+            // Refresh grid based on current view
+            if (currentView === 'detail') {
+                renderLifeGrid();
+            } else {
+                renderFullLifeGrid();
+            }
+            updateStats();
         }
 
         function addTodo() {
@@ -1086,16 +1224,57 @@
             
             if (!text) return;
 
-            if (!userData.todos[currentDay]) {
-                userData.todos[currentDay] = [];
-            }
+            const isMultiDate = document.getElementById('multiDateToggle').checked;
+            
+            if (isMultiDate) {
+                // Add to multiple dates
+                const startDate = new Date(document.getElementById('startDate').value);
+                const endDate = new Date(document.getElementById('endDate').value);
+                
+                if (startDate > endDate) {
+                    alert('End date must be after start date');
+                    return;
+                }
+                
+                const currentDate = new Date(startDate);
+                let addedCount = 0;
+                
+                while (currentDate <= endDate) {
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    
+                    if (!userData.todos[dateStr]) {
+                        userData.todos[dateStr] = [];
+                    }
+                    
+                    userData.todos[dateStr].push({
+                        id: Date.now() + addedCount, // Unique ID for each
+                        text: text,
+                        completed: false,
+                        createdAt: new Date().toISOString()
+                    });
+                    
+                    addedCount++;
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                // Reset multi-date selection
+                document.getElementById('multiDateToggle').checked = false;
+                document.getElementById('dateRangeInputs').classList.add('hidden');
+                document.getElementById('multiDateInfo').classList.add('hidden');
+                
+            } else {
+                // Add to single date (current day)
+                if (!userData.todos[currentDay]) {
+                    userData.todos[currentDay] = [];
+                }
 
-            userData.todos[currentDay].push({
-                id: Date.now(),
-                text: text,
-                completed: false,
-                createdAt: new Date().toISOString()
-            });
+                userData.todos[currentDay].push({
+                    id: Date.now(),
+                    text: text,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                });
+            }
 
             saveData();
             input.value = '';
